@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="hero-section">
+    <div class="container text-center">
+        <h1 class="display-4 mb-4"><i class="fas fa-hospital me-3"></i>Hospital Management System</h1>
+        <p class="lead">Efficient healthcare management for admins, doctors, and patients</p>
+        
+        {% if not current_user.is_authenticated %}
+        <div class="mt-5">
+            <a href="{{ url_for('login') }}" class="btn btn-light btn-lg me-3">
+                <i class="fas fa-sign-in-alt me-2"></i>Login
+            </a>
+            <a href="{{ url_for('register_patient') }}" class="btn btn-outline-light btn-lg">
+                <i class="fas fa-user-plus me-2"></i>Patient Registration
+            </a>
+        </div>
+        {% else %}
+        <div class="alert alert-light">
+            <i class="fas fa-user me-2"></i>You are logged in as <strong>{{ current_user.username }}</strong> ({{ current_user.role }})
+        </div>
+        <a href="{{ url_for('logout') }}" class="btn btn-warning">
+            <i class="fas fa-sign-out-alt me-2"></i>Logout
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+{% if not current_user.is_authenticated %}
+<div class="container">
+    <div class="row mt-5">
+        <div class="col-md-4 mb-4">
+            <div class="card feature-card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-user-shield fa-3x text-primary mb-3"></i>
+                    <h5 class="card-title">Admin Portal</h5>
+                    <p class="card-text">Manage doctors, appointments, and hospital operations efficiently. Oversee all hospital activities and user management.</p>
+                    <div class="mt-3">
+                        <small class="text-muted">
+                            <strong>Default Login:</strong><br>
+                            Username: admin<br>
+                            Password: admin123
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card feature-card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-user-md fa-3x text-success mb-3"></i>
+                    <h5 class="card-title">Doctor Portal</h5>
+                    <p class="card-text">View appointments, manage patient treatments, and update medical records. Access patient history for better diagnosis.</p>
+                    <div class="mt-3">
+                        <small class="text-muted">
+                            <strong>Access:</strong><br>
+                            Accounts created by admin<br>
+                            Default password: doctor123
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card feature-card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-user-injured fa-3x text-info mb-3"></i>
+                    <h5 class="card-title">Patient Portal</h5>
+                    <p class="card-text">Book appointments, view medical history, and manage healthcare needs. Easy access to doctors and treatment records.</p>
+                    <div class="mt-3">
+                        <small class="text-muted">
+                            <strong>Access:</strong><br>
+                            Self-registration available<br>
+                            Secure personal account
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="text-center mb-4">Key Features</h4>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <ul class="list-unstyled">
+                                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Role-based access control</li>
+                                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Appointment scheduling</li>
+                                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Patient medical history</li>
+                                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Doctor availability management</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <ul class="list-unstyled">
+                                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Treatment records</li>
+                                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Search functionality</li>
+                                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Secure authentication</li>
+                                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Responsive design</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% else %}
+<!-- Dashboard redirect for logged-in users -->
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h3>Welcome to HMS Dashboard</h3>
+                    <p class="text-muted">You are successfully logged in as {{ current_user.role }}</p>
+                    
+                    {% if current_user.role == 'admin' %}
+                    <div class="mt-4">
+                        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-tachometer-alt me-2"></i>Go to Admin Dashboard
+                        </a>
+                    </div>
+                    <p class="text-muted mt-3">Manage doctors, patients, and hospital operations</p>
+                    
+                    {% elif current_user.role == 'doctor' %}
+                    <div class="mt-4">
+                        <a href="{{ url_for('doctor_dashboard') }}" class="btn btn-success btn-lg">
+                            <i class="fas fa-stethoscope me-2"></i>Go to Doctor Dashboard
+                        </a>
+                    </div>
+                    <p class="text-muted mt-3">View appointments and manage patient treatments</p>
+                    
+                    {% elif current_user.role == 'patient' %}
+                    <div class="mt-4">
+                        <a href="{{ url_for('patient_dashboard') }}" class="btn btn-info btn-lg">
+                            <i class="fas fa-user me-2"></i>Go to Patient Dashboard
+                        </a>
+                    </div>
+                    <p class="text-muted mt-3">Book appointments and view your medical history</p>
+                    {% endif %}
+                    
+                    <div class="mt-4">
+                        <a href="{{ url_for('logout') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-sign-out-alt me-2"></i>Logout
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

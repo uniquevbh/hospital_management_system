@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2><i class="fas fa-user-md me-2"></i>Manage Doctors</h2>
+        <p class="text-muted">Add and manage doctor profiles in the system</p>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Add Doctor Form -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="fas fa-plus-circle me-2"></i>Add New Doctor</h5>
+            </div>
+            <div class="card-body">
+                <form id="addDoctorForm">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="username" name="username" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="specialization" class="form-label">Specialization</label>
+                        <input type="text" class="form-control" id="specialization" name="specialization" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="department_id" class="form-label">Department</label>
+                        <select class="form-control" id="department_id" name="department_id" required>
+                            <option value="">Select Department</option>
+                            {% for department in departments %}
+                            <option value="{{ department.id }}">{{ department.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="license_number" class="form-label">License Number (Optional)</label>
+                        <input type="text" class="form-control" id="license_number" name="license_number">
+                    </div>
+                    <div class="mb-3">
+                        <label for="experience" class="form-label">Experience (Years, Optional)</label>
+                        <input type="number" class="form-control" id="experience" name="experience" min="0">
+                    </div>
+                    <div class="mb-3">
+                        <label for="consultation_fee" class="form-label">Consultation Fee (Optional)</label>
+                        <input type="number" class="form-control" id="consultation_fee" name="consultation_fee" step="0.01" min="0">
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-user-plus me-2"></i>Add Doctor
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Doctors List -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="fas fa-list me-2"></i>Current Doctors ({{ doctors|length }})</h5>
+            </div>
+            <div class="card-body">
+                {% if doctors %}
+                    {% for doctor in doctors %}
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h6 class="card-title">Dr. {{ doctor.user.username }}</h6>
+                            <p class="card-text mb-1">
+                                <strong>Specialization:</strong> {{ doctor.specialization }}
+                            </p>
+                            <p class="card-text mb-1">
+                                <strong>Department:</strong> {{ doctor.department.name }}
+                            </p>
+                            {% if doctor.experience %}
+                            <p class="card-text mb-1">
+                                <strong>Experience:</strong> {{ doctor.experience }} years
+                            </p>
+                            {% endif %}
+                            <p class="card-text mb-2">
+                                <strong>Status:</strong> 
+                                <span class="badge {% if doctor.is_active %}bg-success{% else %}bg-danger{% endif %}">
+                                    {{ 'Active' if doctor.is_active else 'Inactive' }}
+                                </span>
+                            </p>
+                            <small class="text-muted">
+                                Email: {{ doctor.user.email }}
+                            </small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-user-md fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">No doctors added yet</h5>
+                        <p class="text-muted">Add the first doctor using the form</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

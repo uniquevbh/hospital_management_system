@@ -262,6 +262,37 @@ def admin_dashboard():
     
     recent_appointments = Appointment.query.order_by(Appointment.created_at.desc()).limit(5).all()
     return render_template('admin/dashboard.html', stats=stats, appointments=recent_appointments)
+def admin_dashboard():
+    if current_user.role != 'admin':
+        flash('Access denied', 'danger')
+        return redirect(url_for('index'))
+    
+    stats = {
+        'doctors': Doctor.query.filter_by(is_active=True).count(),
+        'patients': Patient.query.filter_by(is_active=True).count(),
+        'appointments': Appointment.query.count(),
+        'departments': Department.query.count()
+    }
+    
+    # Today's statistics
+    today = date.today()
+    today_stats = {
+        'new_patients': Patient.query.filter(
+            Patient.user.has(User.created_at >= datetime.combine(today, datetime.min.time()))
+        ).count(),
+        'todays_appointments': Appointment.query.filter_by(appointment_date=today).count(),
+        'completed_appointments': Appointment.query.filter_by(
+            appointment_date=today, 
+            status='Completed'
+        ).count()
+    }
+    
+    recent_appointments = Appointment.query.order_by(Appointment.created_at.desc()).limit(5).all()
+    return render_template('admin/dashboard.html', 
+                         stats=stats, 
+                         appointments=recent_appointments,
+                         today_stats=today_stats)
+
 
 @app.route('/admin/doctors')
 @login_required
@@ -539,48 +570,6 @@ def complete_appointment(appointment_id):
     return redirect(url_for('doctor_dashboard'))
 
 
-
-
-
-@app.route('/admin/dashboard')
-@login_required
-def admin_dashboard():
-    if current_user.role != 'admin':
-        flash('Access denied', 'danger')
-        return redirect(url_for('index'))
-    
-    stats = {
-        'doctors': Doctor.query.filter_by(is_active=True).count(),
-        'patients': Patient.query.filter_by(is_active=True).count(),
-        'appointments': Appointment.query.count(),
-        'departments': Department.query.count()
-    }
-    
-    # Today's statistics
-    today = date.today()
-    today_stats = {
-        'new_patients': Patient.query.filter(
-            Patient.user.has(User.created_at >= datetime.combine(today, datetime.min.time()))
-        ).count(),
-        'todays_appointments': Appointment.query.filter_by(appointment_date=today).count(),
-        'completed_appointments': Appointment.query.filter_by(
-            appointment_date=today, 
-            status='Completed'
-        ).count()
-    }
-    
-    recent_appointments = Appointment.query.order_by(Appointment.created_at.desc()).limit(5).all()
-    return render_template('admin/dashboard.html', 
-                         stats=stats, 
-                         appointments=recent_appointments,
-                         today_stats=today_stats)
-
-
-
-
-
-
-
 @app.route('/admin/reset_database', methods=['POST'])
 @login_required
 def reset_database():
@@ -667,3 +656,4 @@ def reset_database():
 
     return redirect(url_for('admin_dashboard'))
 # --- END ROUTE ---
+

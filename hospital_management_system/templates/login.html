@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white text-center py-4">
+                <h3 class="mb-0"><i class="fas fa-hospital me-2"></i>HMS Login</h3>
+                <small class="opacity-75">Hospital Management System</small>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST">
+                    <div class="mb-4">
+                        <label for="username" class="form-label fw-bold">Username</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0">
+                                <i class="fas fa-user text-primary"></i>
+                            </span>
+                            <input type="text" 
+                                   class="form-control border-start-0" 
+                                   id="username" 
+                                   name="username" 
+                                   placeholder="Enter your username"
+                                   required
+                                   autofocus>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="password" class="form-label fw-bold">Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0">
+                                <i class="fas fa-lock text-primary"></i>
+                            </span>
+                            <input type="password" 
+                                   class="form-control border-start-0" 
+                                   id="password" 
+                                   name="password" 
+                                   placeholder="Enter your password"
+                                   required>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-100 py-2 fw-bold">
+                        <i class="fas fa-sign-in-alt me-2"></i>Login to System
+                    </button>
+                </form>
+                
+                <div class="mt-4 text-center">
+                    <p class="mb-3">New to our hospital system?</p>
+                    <a href="{{ url_for('register_patient') }}" class="btn btn-outline-primary w-100">
+                        <i class="fas fa-user-plus me-2"></i>Register as Patient
+                    </a>
+                </div>
+                
+                <hr class="my-4">
+                
+                <div class="demo-accounts">
+                    <h6 class="text-center mb-3 fw-bold">Demo Login Credentials</h6>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="card border-primary">
+                                <div class="card-body p-3">
+                                    <h6 class="card-title text-primary mb-2">
+                                        <i class="fas fa-user-shield me-1"></i>Admin
+                                    </h6>
+                                    <small class="text-muted d-block">
+                                        <strong>Username:</strong> admin
+                                    </small>
+                                    <small class="text-muted d-block">
+                                        <strong>Password:</strong> admin123
+                                    </small>
+                                    <small class="text-muted d-block mt-1">
+                                        Full system access
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <div class="card border-success">
+                                <div class="card-body p-3">
+                                    <h6 class="card-title text-success mb-2">
+                                        <i class="fas fa-user-md me-1"></i>Doctor
+                                    </h6>
+                                    <small class="text-muted d-block">
+                                        <strong>Username:</strong> [Created by Admin]
+                                    </small>
+                                    <small class="text-muted d-block">
+                                        <strong>Password:</strong> doctor123
+                                    </small>
+                                    <small class="text-muted d-block mt-1">
+                                        Patient management
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card border-info">
+                        <div class="card-body p-3">
+                            <h6 class="card-title text-info mb-2">
+                                <i class="fas fa-user-injured me-1"></i>Patient
+                            </h6>
+                            <small class="text-muted d-block">
+                                <strong>Access:</strong> Self-registration required
+                            </small>
+                            <small class="text-muted d-block mt-1">
+                                Book appointments & view history
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-4 text-center">
+                    <small class="text-muted">
+                        <i class="fas fa-info-circle me-1"></i>
+                        For security, please change default passwords after first login
+                    </small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center mt-4">
+            <small class="text-muted">
+                &copy; 2025 Hospital Management System. Secure healthcare platform.
+            </small>
+        </div>
+    </div>
+</div>
+
+<div class="mb-3 text-end">
+    <a href="{{ url_for('forgot_password') }}" class="text-primary">
+        <i class="fas fa-question-circle me-1"></i>Forgot Password?
+    </a>
+</div>
+
+<style>
+.card {
+    border: none;
+    border-radius: 15px;
+}
+
+.card-header {
+    border-radius: 15px 15px 0 0 !important;
+}
+
+.input-group-text {
+    border-radius: 8px 0 0 8px;
+}
+
+.form-control {
+    border-radius: 0 8px 8px 0;
+}
+
+.btn {
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+}
+
+.demo-accounts .card {
+    transition: transform 0.2s ease;
+}
+
+.demo-accounts .card:hover {
+    transform: translateY(-3px);
+}
+
+.shadow {
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
+}
+</style>
+{% endblock %}

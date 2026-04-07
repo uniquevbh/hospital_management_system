@@ -1,0 +1,371 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2><i class="fas fa-stethoscope me-2"></i>Doctor Dashboard</h2>
+        <p class="text-muted">Welcome, Dr. {{ doctor.user.username }} - {{ doctor.specialization }}</p>
+    </div>
+</div>
+
+<!-- Today's Appointments -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="fas fa-calendar-day me-2"></i>Today's Appointments</h5>
+            </div>
+            <div class="card-body">
+                {% if todays_appointments %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Patient</th>
+                                    <th>Symptoms</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for appointment in todays_appointments %}
+                                <tr>
+                                    <td>{{ appointment.appointment_time }}</td>
+                                    <td>
+                                        <strong>{{ appointment.patient.user.username }}</strong>
+                                        {% if appointment.patient.phone %}
+                                        <br>
+                                        <small class="text-muted">{{ appointment.patient.phone }}</small>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if appointment.symptoms %}
+                                            {{ appointment.symptoms[:50] }}{% if appointment.symptoms|length > 50 %}...{% endif %}
+                                        {% else %}
+                                            <span class="text-muted">No symptoms noted</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge 
+                                            {% if appointment.status == 'Booked' %}bg-primary
+                                            {% elif appointment.status == 'Completed' %}bg-success
+                                            {% else %}bg-danger{% endif %}">
+                                            {{ appointment.status }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            {% if appointment.status == 'Booked' %}
+                                            <!-- Complete Appointment Button -->
+                                            <button class="btn btn-success" 
+                                                    data-bs-toggle="modal" 
+                                                    data-bs-target="#completeModal{{ appointment.id }}">
+                                                <i class="fas fa-check me-1"></i>Complete
+                                            </button>
+                                            
+                                            <!-- Cancel Appointment Button -->
+                                            <form action="{{ url_for('cancel_appointment', appointment_id=appointment.id) }}" method="POST" 
+                                                  onsubmit="return confirm('Cancel this appointment?');" class="d-inline">
+                                                <button type="submit" class="btn btn-danger">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            </form>
+                                            {% elif appointment.status == 'Completed' and appointment.treatment %}
+                                            <!-- View Treatment Details -->
+                                            <button class="btn btn-info" 
+                                                    data-bs-toggle="modal" 
+                                                    data-bs-target="#treatmentModal{{ appointment.id }}">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            {% endif %}
+                                        </div>
+
+                                        <!-- Complete Appointment Modal -->
+                                        {% if appointment.status == 'Booked' %}
+                                        <div class="modal fade" id="completeModal{{ appointment.id }}" tabindex="-1">
+                                            <div class="modal-dialog modal-lg">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title">Complete Appointment</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                    </div>
+                                                    <form action="{{ url_for('complete_appointment', appointment_id=appointment.id) }}" method="POST">
+                                                        <div class="modal-body">
+                                                            <h6>Patient: {{ appointment.patient.user.username }}</h6>
+                                                            <p><strong>Appointment Time:</strong> {{ appointment.appointment_time }}</p>
+                                                            
+                                                            {% if appointment.symptoms %}
+                                                            <div class="mb-3">
+                                                                <label class="form-label"><strong>Reported Symptoms:</strong></label>
+                                                                <p class="border p-2 rounded bg-light">{{ appointment.symptoms }}</p>
+                                                            </div>
+                                                            {% endif %}
+                                                            
+                                                            <div class="mb-3">
+                                                                <label for="diagnosis{{ appointment.id }}" class="form-label">Diagnosis *</label>
+                                                                <textarea class="form-control" id="diagnosis{{ appointment.id }}" name="diagnosis" rows="3" required placeholder="Enter diagnosis details..."></textarea>
+                                                            </div>
+                                                            
+                                                            <div class="mb-3">
+                                                                <label for="prescription{{ appointment.id }}" class="form-label">Prescription *</label>
+                                                                <textarea class="form-control" id="prescription{{ appointment.id }}" name="prescription" rows="3" required placeholder="Enter prescription details..."></textarea>
+                                                            </div>
+                                                            
+                                                            <div class="mb-3">
+                                                                <label for="notes{{ appointment.id }}" class="form-label">Additional Notes</label>
+                                                                <textarea class="form-control" id="notes{{ appointment.id }}" name="notes" rows="2" placeholder="Any additional notes..."></textarea>
+                                                            </div>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                            <button type="submit" class="btn btn-success">
+                                                                <i class="fas fa-check me-1"></i>Mark as Completed
+                                                            </button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+
+                                        <!-- Treatment Details Modal -->
+                                        {% if appointment.status == 'Completed' and appointment.treatment %}
+                                        <div class="modal fade" id="treatmentModal{{ appointment.id }}" tabindex="-1">
+                                            <div class="modal-dialog modal-lg">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title">Treatment Details</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <h6>Patient: {{ appointment.patient.user.username }}</h6>
+                                                        <p><strong>Date:</strong> {{ appointment.appointment_date }} at {{ appointment.appointment_time }}</p>
+                                                        
+                                                        <div class="mb-3">
+                                                            <h6>Diagnosis</h6>
+                                                            <p class="border p-2 rounded bg-light">{{ appointment.treatment.diagnosis }}</p>
+                                                        </div>
+                                                        
+                                                        <div class="mb-3">
+                                                            <h6>Prescription</h6>
+                                                            <p class="border p-2 rounded bg-light">{{ appointment.treatment.prescription }}</p>
+                                                        </div>
+                                                        
+                                                        {% if appointment.treatment.notes %}
+                                                        <div class="mb-3">
+                                                            <h6>Additional Notes</h6>
+                                                            <p class="border p-2 rounded bg-light">{{ appointment.treatment.notes }}</p>
+                                                        </div>
+                                                        {% endif %}
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-calendar-check fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">No appointments scheduled for today</h5>
+                        <p class="text-muted">Enjoy your day!</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Upcoming Appointments -->
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="fas fa-calendar-week me-2"></i>Upcoming Appointments (Next 7 Days)</h5>
+            </div>
+            <div class="card-body">
+                {% if upcoming_appointments %}
+                    {% for appointment in upcoming_appointments %}
+                    <div class="border-bottom pb-3 mb-3">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="mb-1">{{ appointment.patient.user.username }}</h6>
+                                <small class="text-muted">
+                                    <i class="fas fa-calendar me-1"></i>{{ appointment.appointment_date }} 
+                                    <i class="fas fa-clock ms-2 me-1"></i>{{ appointment.appointment_time }}
+                                </small>
+                                <br>
+                                <span class="badge bg-primary">{{ appointment.status }}</span>
+                                
+                                {% if appointment.symptoms %}
+                                <br>
+                                <small class="text-muted mt-1 d-block">
+                                    <strong>Symptoms:</strong> {{ appointment.symptoms[:80] }}{% if appointment.symptoms|length > 80 %}...{% endif %}
+                                </small>
+                                {% endif %}
+                            </div>
+                            {% if appointment.status == 'Booked' %}
+                            <div class="btn-group btn-group-sm">
+                                <form action="{{ url_for('cancel_appointment', appointment_id=appointment.id) }}" method="POST" 
+                                      onsubmit="return confirm('Cancel this appointment?');">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </form>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-3">
+                        <i class="fas fa-calendar-plus fa-2x text-muted mb-2"></i>
+                        <p class="text-muted">No upcoming appointments</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats & Information -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Quick Stats</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-6 mb-3">
+                        <div class="border rounded p-3 bg-light">
+                            <h4 class="text-primary">{{ todays_appointments|length }}</h4>
+                            <small class="text-muted">Today's Appointments</small>
+                        </div>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <div class="border rounded p-3 bg-light">
+                            <h4 class="text-success">{{ upcoming_appointments|length }}</h4>
+                            <small class="text-muted">Upcoming This Week</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Appointment Statistics -->
+                <div class="mt-3">
+                    <h6>Appointment Statistics:</h6>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-calendar-check me-2 text-success"></i>
+                            Completed: {{ todays_appointments|selectattr("status", "equalto", "Completed")|list|length }} today
+                        </li>
+                        <li><i class="fas fa-calendar me-2 text-primary"></i>
+                            Booked: {{ todays_appointments|selectattr("status", "equalto", "Booked")|list|length }} today
+                        </li>
+                        <li><i class="fas fa-calendar-times me-2 text-danger"></i>
+                            Cancelled: {{ todays_appointments|selectattr("status", "equalto", "Cancelled")|list|length }} today
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="mt-3">
+                    <h6>Doctor Information:</h6>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-graduation-cap me-2 text-primary"></i>Specialization: {{ doctor.specialization }}</li>
+                        <li><i class="fas fa-building me-2 text-primary"></i>Department: {{ doctor.department.name }}</li>
+                        {% if doctor.experience %}
+                        <li><i class="fas fa-briefcase me-2 text-primary"></i>Experience: {{ doctor.experience }} years</li>
+                        {% endif %}
+                        {% if doctor.consultation_fee %}
+                        <li><i class="fas fa-money-bill me-2 text-primary"></i>Fee: ${{ doctor.consultation_fee }}</li>
+                        {% endif %}
+                    </ul>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="mt-4">
+                    <h6>Quick Actions:</h6>
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-primary btn-sm" onclick="scrollToToday()">
+                            <i class="fas fa-calendar-day me-1"></i>View Today's Schedule
+                        </button>
+                        {% if upcoming_appointments %}
+                        <button class="btn btn-outline-success btn-sm" onclick="scrollToUpcoming()">
+                            <i class="fas fa-calendar-week me-1"></i>View Upcoming
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.table td {
+    vertical-align: middle;
+}
+
+.badge {
+    font-size: 0.75em;
+}
+
+.btn-group-sm > .btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+.border.rounded {
+    transition: transform 0.2s;
+}
+
+.border.rounded:hover {
+    transform: translateY(-2px);
+}
+</style>
+
+<script>
+function scrollToToday() {
+    document.querySelector('.card-header.bg-primary').scrollIntoView({ 
+        behavior: 'smooth' 
+    });
+}
+
+function scrollToUpcoming() {
+    document.querySelector('.card-header.bg-success').scrollIntoView({ 
+        behavior: 'smooth' 
+    });
+}
+
+// Auto-hide alerts after 5 seconds
+setTimeout(() => {
+    const alerts = document.querySelectorAll('.alert');
+    alerts.forEach(alert => {
+        const bsAlert = new bootstrap.Alert(alert);
+        bsAlert.close();
+    });
+}, 5000);
+
+// Form validation for complete appointment modal
+document.addEventListener('DOMContentLoaded', function() {
+    const completeForms = document.querySelectorAll('form[action*="complete_appointment"]');
+    completeForms.forEach(form => {
+        form.addEventListener('submit', function(e) {
+            const diagnosis = form.querySelector('textarea[name="diagnosis"]');
+            const prescription = form.querySelector('textarea[name="prescription"]');
+            
+            if (!diagnosis.value.trim() || !prescription.value.trim()) {
+                e.preventDefault();
+                alert('Please fill in both diagnosis and prescription fields.');
+                return;
+            }
+        });
+    });
+});
+</script>
+{% endblock %}
